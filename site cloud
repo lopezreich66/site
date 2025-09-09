@@ -1,0 +1,84 @@
+<!doctype html>
+const grid = document.getElementById('prod');
+grid.innerHTML='';
+lista.forEach(p=>{
+const div = document.createElement('div'); div.className='card';
+div.innerHTML = `\n <img src="${p.img}" alt="${p.nome}"/>\n <h3>${p.nome}</h3>\n <div class="meta"><div class="price">R$ ${p.preco.toFixed(2).replace('.',',')}</div><div class="old">R$ ${p.antigo.toFixed(2).replace('.',',')}</div></div>\n <div style="margin-top:10px;display:flex;gap:8px">\n <button class='btn' onclick='abrirProduto(${p.id})'>Ver</button>\n <button class='btn btn-primary' onclick='adicionarCarrinho(${p.id})'>Adicionar</button>\n </div>\n `;
+grid.appendChild(div);
+});
+}
+
+
+function abrirProduto(id){
+const p = produtos.find(x=>x.id===id);
+const content = `\n <div style=\"display:flex;gap:12px;flex-wrap:wrap\">\n <img src='${p.img}' style='width:180px;height:180px;object-fit:cover;border-radius:8px'/>\n <div style=\"flex:1\">\n <h3>${p.nome}</h3>\n <div style=\"font-weight:800;font-size:18px;margin-top:6px\">R$ ${p.preco.toFixed(2).replace('.',',')}</div>\n <p style=\"color:${'#6b7280'}\">Estoque: ${p.estoque}</p>\n <div style=\"margin-top:8px\">\n <label>Quantidade: </label> <input id=\"qtd\" value=1 type=number min=1 max=${p.estoque} style=\"width:70px;padding:6px;border-radius:6px;border:1px solid #eef2f6\"/>\n <button class=\"btn btn-primary\" style=\"margin-left:8px\" onclick=\"adicionarCarrinho(${p.id}, parseInt(document.getElementById(\\\'qtd\\\').value))\">Adicionar ao carrinho</button>\n </div>\n </div>\n </div>\n `;
+document.getElementById('modalContent').innerHTML = content;
+document.getElementById('backdrop').style.display='flex';
+}
+
+
+function adicionarCarrinho(id, qtd=1){
+const p = produtos.find(x=>x.id===id);
+const item = carrinho.find(c=>c.id===id);
+if(item){ item.qtd += qtd; } else { carrinho.push({id:p.id,nome:p.nome,preco:p.preco,qtd:qtd}); }
+updateCartButton();
+alert('Produto adicionado ao carrinho');
+}
+
+
+function updateCartButton(){
+const count = carrinho.reduce((s,i)=>s+i.qtd,0);
+document.querySelector('.cart-btn').textContent = `Carrinho (${count})`;
+}
+
+
+function abrirCarrinho(){
+let html = '<h3>Seu carrinho</h3>';
+if(carrinho.length===0){ html += '<p style="color:#6b7280">Seu carrinho está vazio.</p>'; }
+else{
+html += '<div>';
+carrinho.forEach(i=>{ html += `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f1f5f9"><div>${i.nome} x ${i.qtd}</div><div>R$ ${(i.preco*i.qtd).toFixed(2).replace('.',',')}</div></div>`; });
+const total = carrinho.reduce((s,i)=>s+i.preco*i.qtd,0);
+html += `<div style="margin-top:8px;font-weight:800">Total: R$ ${total.toFixed(2).replace('.',',')}</div>`;
+html += '<div style="margin-top:10px;display:flex;gap:8px"><button class="btn" onclick="fecharModal()">Continuar comprando</button><button class="btn btn-primary" onclick="finalizar()">Finalizar pedido</button></div>';
+html += '</div>';
+}
+document.getElementById('modalContent').innerHTML = html;
+document.getElementById('backdrop').style.display='flex';
+}
+
+
+function fecharModal(){ document.getElementById('backdrop').style.display='none'; }
+
+
+function finalizar(){
+// aqui você pode integrar gateway de pagamento ou direcionar pro link da Shopee
+const total = carrinho.reduce((s,i)=>s+i.preco*i.qtd,0);
+alert('Pedido criado. Total: R$ '+total.toFixed(2).replace('.',','));
+carrinho = []; updateCartButton(); fecharModal();
+}
+
+
+function filtrar(){
+const q = document.getElementById('search').value.toLowerCase();
+if(!q){ renderProdutos(produtos); return; }
+const filt = produtos.filter(p=>p.nome.toLowerCase().includes(q));
+renderProdutos(filt);
+}
+
+
+// formulário de contato (simples)
+document.getElementById('contactForm').addEventListener('submit', function(e){
+e.preventDefault();
+alert('Mensagem enviada! Responderei via WhatsApp o mais rápido possível.');
+document.getElementById('nome').value='';document.getElementById('contatoInput').value='';document.getElementById('mensagem').value='';
+});
+
+
+// inicialização
+renderProdutos(produtos);
+updateCartButton();
+document.getElementById('ano').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
